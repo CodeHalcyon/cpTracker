@@ -37,6 +37,9 @@ const fetchUser = () => {
     console.log(data.comment);
     if(data.status === 'FAILED'){
       error.innerText = `User with handle ${userHandle} not found 😭😭 `
+    }else{
+      error.innerText = ``
+
     }
     const problems = data.result.filter(sub => sub.verdict === "OK")
     return problems
