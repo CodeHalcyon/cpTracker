@@ -33,6 +33,11 @@ const fetchUser = () => {
     return response.json()
   }).then((data) => {
     console.log(data)
+    console.log(data.status);
+    console.log(data.comment);
+    if(data.status === 'FAILED'){
+      error.innerText = `User with handle ${userHandle} not found 😭😭 `
+    }
     const problems = data.result.filter(sub => sub.verdict === "OK")
     return problems
 
@@ -59,7 +64,6 @@ const fetchUser = () => {
 
   }).catch((e) => {
     console.log(e)
-    error.innerText = e
   })}, 1000)
 
 

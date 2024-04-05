@@ -75,6 +75,13 @@ canvas {
   .get-data-btn:hover {
     background-color: #0056b3;
   }
+  #error {
+    color: red;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 10px;
+}
   
   @media (min-width: 768px) {
     .username-label {
@@ -82,9 +89,6 @@ canvas {
         font-weight: bolder;
         margin-bottom: 10px;
       }
-    .username-input {
-      /* width: 0%; */
-    }
     
     .get-data-btn {
       width: 30%;
@@ -94,10 +98,13 @@ canvas {
         padding: 8px;
     }
     .graph>h1{
-        font-size: 0.5rem;
+        font-size: 1rem;
     }
     .graph{
         width: 100%;
+    }
+    #error{
+        font-size: 0.8rem;
     }
   }
 
@@ -126,6 +133,9 @@ canvas {
     }
     .graph{
         width: 100%;
+    }
+    #error{
+        font-size: 0.5rem;
     }
 }
   
