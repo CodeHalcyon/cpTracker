@@ -1,32 +1,131 @@
 *{
     margin: 0;
     padding: 0;
-}
-
-table{
-    width: 100%;
-    text-align: center;
-}
-td{
-    padding: 10px;
-    font-size: 1.25rem;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
-.th{
-    font-weight: bold;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    font-size: 1.5rem;
-}
 
-.graph{
-    /* text-align: left; */
-    padding: 10px;
-    /* background: green; */
+table {
     width: 50%;
-    max-width: 600px;
-    margin: 0 auto;
-    margin-top: 50px;
-    display: flex;
-    gap: 50px;
-    flex-direction: column;
+    margin: 10px auto;
+    border-collapse: collapse;
 }
+td, th {
+    padding: 10px;
+    font-size: 1rem;
+    font-family: Arial, sans-serif;
+    border: 1px solid #ccc;
+}
+.th {
+    font-weight: bold;
+    font-size: 0.5rem;
+    background-color: #f2f2f2;
+}
+
+.graph {
+    max-width: 50%;
+    margin: auto;
+    overflow-x: auto; /* Add horizontal scroll if needed on smaller screens */
+}
+.graph>h1{
+    display: block;
+    font-size: 1.1rem;
+    width: 50%;
+    margin: 0 auto;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+/* input styling */
+.username-label {
+    display: block;
+    margin-bottom: 10px;
+    width: 50%;
+    margin: 0 auto;
+    font-weight: bolder;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+  
+  .username-input {
+    display: block;
+    width: 50%;
+    padding: 10px;
+    margin: 10px auto;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .get-data-btn {
+    display: block;
+    width: 50%;
+    margin: auto;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .get-data-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  @media (min-width: 768px) {
+    .username-label {
+        display: block;
+        font-weight: bolder;
+        margin-bottom: 10px;
+      }
+    .username-input {
+      /* width: 0%; */
+    }
+    
+    .get-data-btn {
+      width: 30%;
+    }
+    td, th {
+        font-size: 0.5rem;
+        padding: 8px;
+    }
+    .graph>h1{
+        font-size: 0.5rem;
+    }
+    .graph{
+        width: 100%;
+    }
+  }
+
+  
+@media (max-width: 576px) {
+    .th,td {
+        font-size: 0.5rem;
+    }
+    .username-label{
+        font-size: 0.7rem;
+    }
+    .username-input {
+        width: 50%;
+        margin-inline: 25%;
+        font-size: 0.7rem;
+        padding: 10px;
+      }
+    .get-data-btn {
+        width: 30%;
+        margin: 0 auto;
+        font-size: 0.5rem;
+        padding: 10px;
+      }
+      .graph>h1{
+        font-size: 0.5rem;
+    }
+    .graph{
+        width: 100%;
+    }
+}
+  

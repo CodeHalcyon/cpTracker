@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,11 +8,16 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 </head>
+
 <body>
-    <label for="name">Enter your codeforces username: 
+    <!-- <label for="name">Enter your codeforces username: 
         <input id="forcesUsername" type="text"/>
     </label>
-    <button onclick="fetchUser()"> GET DATA </button>
+    <button onclick="fetchUser()"> GET DATA </button> -->
+    <label for="name" class="username-label">Enter your Codeforces username:</label>
+    <input id="forcesUsername" type="text" class="username-input" />
+    <button onclick="fetchUser()" class="get-data-btn">GET DATA</button>
+
 
     <table id="table" border="1">
         <tr>
@@ -25,11 +31,17 @@
     </table>
     <p class="error"></p>
 
-    <div class="graph">
+    <!-- <div class="graph">
         <h1>Graphical Race: </h1>
         <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+    </div> -->
+    <div class="graph">
+        <h1>Graphical Race:</h1>
+        <canvas id="myChart"></canvas>
     </div>
+    
     <script src="main.js"></script>
 
 </body>
+
 </html>

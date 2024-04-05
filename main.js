@@ -5,6 +5,13 @@ let users = []
 
 let userData = []
 
+window.addEventListener('resize', function() {
+  var canvas = document.getElementById('myChart');
+  canvas.style.width = '100%';
+  canvas.style.height = 'auto';
+});
+
+
 
 const fetchUser = () => {
   console.log("btn clicked")
@@ -129,13 +136,9 @@ const fetchUser = () => {
           }
         }
       });
-
-
     })
     .catch((e) => {
       console.log(e);
     }); 
   }, 4000)
-
-
 }
