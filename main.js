@@ -147,7 +147,7 @@ const fetchUser = () => {
     fetch(ur)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
+        // console.log(data);
 
         if (data.status === "FAILED") {
           error.innerHTML = `User "${userHandle}" not found`;
@@ -229,7 +229,7 @@ const fetchUser = () => {
     fetch(ur2)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
+        // console.log(data);
 
         if (data.status === "FAILED") {
           return;
