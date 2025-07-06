@@ -1,206 +1,356 @@
-// let userHandle = "chetanpdf"
+let users = [];
+let userData = [];
+let userTagData = new Map(); // Store tag data for each user
+let ratingChart = null; // Store reference to the rating chart
 const table = document.getElementById("table");
 const error = document.getElementById("error");
-let users = [];
-
-let userData = [];
-
+const loading = document.getElementById("loading");
+const pieChartsContainer = document.getElementById("pieChartsContainer");
+let userMaxRating = 0
 window.addEventListener("resize", function () {
   var canvas = document.getElementById("myChart");
-  canvas.style.width = "100%";
-  canvas.style.height = "auto";
+  if (canvas) {
+    canvas.style.width = "100%";
+    canvas.style.height = "auto";
+  }
 });
 
-const fetchUser = () => {
-  let userHandle = document.getElementById("forcesUsername").value;
-  const ur = `https://codeforces.com/api/user.status?handle=${userHandle}`;
-  const ur2 = `https://codeforces.com/api/user.info?handles=${userHandle}`;
-  const ur3 = `https://codeforces.com/api/contest.list?gym=true&handle=${userHandle}`;
-  const tr = document.createElement("tr");
-  let c = 0;
-  let score = 0;
-  let xValues, yValues;
-  let userObj = new Object();
-  let tagObj = new Object();
-  let userTags = [];
-  let userTagsObjs = [];
+const createPieChart = (userHandle, tagzCount, unsolvedUrls, unsolvedNames) => {
+  const labels = Object.keys(tagzCount);
+  const datas = Object.values(tagzCount);
 
-  //solved count
-  setTimeout(() => {
-    fetch(ur)
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        console.log(data);
-        res = data.result;
-        console.log(res);
-        let tagz = [];
-        res.forEach((element) => {
-          if (element.verdict === "OK") {
-            tagz.push(element.problem.tags);
-          }
-        });
-        let tagzCount = {};
+  if (labels.length > 0) {
+    // Create a new card for this user's pie chart
+    const pieChartCard = document.createElement("div");
+    pieChartCard.className = "card";
+    pieChartCard.innerHTML = `
+                    <h3 class="card-title">${userHandle} - Problem Tags</h3>
+                    <div class="pie-chart-container">
+                        <canvas id="tagPieChart_${userHandle}"></canvas>
+                    </div>
+                    <div class="unsolved-section">
+                        <h4 class="unsolved-title">Practice what you left 🥺</h4>
+                        <div class="unsolved-problems" id="unsolved_${userHandle}">
+                            ${
+                              unsolvedUrls.length > 0
+                                ? unsolvedUrls
+                                    .slice(0, 10)
+                                    .map(
+                                      (url, index) => `
+                                <a href="${url}" target="_blank" class="unsolved-link">
+                                  ${
+                                    unsolvedNames[index] ||
+                                    url.split("/").pop().replace("/", "")
+                                  }
+                                </a>
+                              `
+                                    )
+                                    .join("")
+                                : '<p class="no-unsolved">Great! No unsolved problems found 🎉</p>'
+                            }
+                            ${
+                              unsolvedUrls.length > 10
+                                ? `<p class="more-problems">... and ${
+                                    unsolvedUrls.length - 10
+                                  } more problems</p>`
+                                : ""
+                            }
+                        </div>
+                    </div>
+                `;
 
-        tagz.forEach((tag) => {
-          tag.forEach((t) => {
-            if (tagzCount.hasOwnProperty(t)) {
-              tagzCount[t]++;
-            } else {
-              tagzCount[t] = 1;
-            }
-          });
-        });
-        console.log(tagzCount);
-        // Prepare data for pie chart
-        const labels = Object.keys(tagzCount);
-        const datas = Object.values(tagzCount);
+    pieChartsContainer.appendChild(pieChartCard);
 
-        // Create pie chart
-        const ctx = document.getElementById("tagPieChart").getContext("2d");
-        const tagPieChart = new Chart(ctx, {
-          type: "pie",
-          data: {
-            labels: labels,
-            datasets: [
-              {
-                label: "Tag Count",
-                data: datas,
-                backgroundColor: [
-                  "rgba(255, 99, 132, 0.6)",
-                  "rgba(54, 162, 235, 0.6)",
-                  "rgba(255, 206, 86, 0.6)",
-                  "rgba(75, 192, 192, 0.6)",
-                  "rgba(153, 102, 255, 0.6)",
-                  "rgba(255, 159, 64, 0.6)",
-                ],
-                borderWidth: 1,
-              },
-            ],
+    // Create the pie chart
+    const ctx = document
+      .getElementById(`tagPieChart_${userHandle}`)
+      .getContext("2d");
+    new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "Problems",
+            data: datas,
+            backgroundColor: [
+              "#FF6384",
+              "#36A2EB",
+              "#FFCE56",
+              "#4BC0C0",
+              "#9966FF",
+              "#FF9F40",
+              "#FF6384",
+              "#C9CBCF",
+              "#4BC0C0",
+              "#FF6384",
+              "#36A2EB",
+              "#FFCE56",
+              "#4BC0C0",
+              "#9966FF",
+              "#FF9F40",
+              "#FF6384",
+              "#C9CBCF",
+              "#4BC0C0",
+              "#FF6384",
+              "#36A2EB",
+            ].slice(0, labels.length),
+            borderColor: "#0a0a0a",
+            borderWidth: 2,
           },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: {
-                position: "bottom",
-              },
-              title: {
-                display: true,
-                text: "Tag Usage Pie Chart",
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              color: "white",
+              font: {
+                size: 10,
               },
             },
           },
-        });
-        let problemArray = data.result;
-        console.log(userTags);
-        if (data.status === "FAILED") {
-          error.innerText = `User with handle ${userHandle} not found!!`;
-        } else {
-          error.innerText = ``;
-        }
-        const problems = data.result.filter((sub) => sub.verdict === "OK");
-        return problems;
-      })
-      .then((problems) => {
-        if (!users.includes(userHandle)) {
-          const td1 = document.createElement("td");
-          td1.innerHTML = userHandle;
+        },
+      },
+    });
+  }
+};
 
-          userObj.name = userHandle;
-          const td2 = document.createElement("td");
-          if (problems.length < 62) {
-            td2.style.color = "red";
-            c++;
-          }
-          score = 10 * problems.length;
-          td2.innerHTML = problems.length;
-          userObj.solved = problems.length;
-          tr.appendChild(td1);
-          tr.appendChild(td2);
-          table.appendChild(tr);
+const fetchUser = () => {
+  let userHandle = document.getElementById("forcesUsername").value.trim();
+
+  if (!userHandle) {
+    error.innerHTML = "Please enter a username";
+    return;
+  }
+
+  if (users.includes(userHandle)) {
+    error.innerHTML = `User "${userHandle}" already added`;
+    return;
+  }
+
+  loading.classList.add("active");
+  error.innerHTML = "";
+
+  const ur = `https://codeforces.com/api/user.status?handle=${userHandle}`;
+  const ur2 = `https://codeforces.com/api/user.info?handles=${userHandle}`;
+
+  let userObj = {};
+  let c = 0;
+  let score = 0;
+
+  // Fetch user submissions
+  setTimeout(() => {
+    fetch(ur)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+
+        if (data.status === "FAILED") {
+          error.innerHTML = `User "${userHandle}" not found`;
+          loading.classList.remove("active");
+          return;
         }
-        users.push(userHandle);
+
+        const res = data.result;
+        let tagz = [];
+        let unsolvedUrls = [];
+        let unsolvedNames = [];
+        let solvedProblems = new Set();
+
+        // First pass: collect all solved problems
+        res.forEach((element) => {
+          if (element.verdict === "OK") {
+            tagz.push(element.problem.tags);
+            const problemKey =
+              element.problem.contestId + "/" + element.problem.index;
+            solvedProblems.add(problemKey);
+          }
+        });
+
+        // Second pass: collect unsolved problems (only if not already solved)
+        res.forEach((element) => {
+          const problemKey =
+            element.problem.contestId + "/" + element.problem.index;
+          const problemUrl =
+            "https://codeforces.com/problemset/problem/" + problemKey;
+
+          if (
+            !solvedProblems.has(problemKey) && // Not solved
+            (element.verdict === "SKIPPED" ||
+              element.verdict === "WRONG_ANSWER") &&
+            !unsolvedUrls.includes(problemUrl) && // Not already in unsolved list
+            !unsolvedNames.includes(element.problem.name)
+          ) {
+            unsolvedUrls.push(problemUrl);
+            unsolvedNames.push(element.problem.name);
+          }
+        });
+
+        // Store unsolved URLs for this user
+        userObj.unsolvedUrls = unsolvedUrls;
+        userObj.unsolvedNames = unsolvedNames;
+        let tagzCount = {};
+        tagz.forEach((tag) => {
+          tag.forEach((t) => {
+            tagzCount[t] = (tagzCount[t] || 0) + 1;
+          });
+        });
+
+        // Store tag data for this user
+        userTagData.set(userHandle, tagzCount);
+
+        // Create individual pie chart for this user
+        createPieChart(userHandle, tagzCount, unsolvedUrls, unsolvedNames);
+
+        const problems = data.result.filter((sub) => sub.verdict === "OK");
+        userObj.name = userHandle;
+        userObj.solved = problems.length;
+        score = 10 * problems.length;
+
+        if (problems.length < 62) {
+          c++;
+        }
+
+        return problems;
       })
       .catch((e) => {
         console.log(e);
+        error.innerHTML = "Error fetching user data";
+        loading.classList.remove("active");
       });
   }, 1000);
 
-  //ratings
+  // Fetch user info
   setTimeout(() => {
     fetch(ur2)
-      .then((response) => {
-        return response.json();
-      })
+      .then((response) => response.json())
       .then((data) => {
-        return data;
-      })
-      .then((details) => {
-        console.log(details);
-        // if (!users.includes(userHandle)) {
+        console.log(data);
 
-        const td3 = document.createElement("td");
-        if (details.result[0].maxRating < 800) {
-          td3.style.color = "red";
-          c++;
+        if (data.status === "FAILED") {
+          return;
         }
-        td3.innerText = details.result[0].maxRating;
-        userObj.maxRating = details.result[0].maxRating;
 
-        const td4 = document.createElement("td");
-        if (details.result[0].rating < 800) {
-          td4.style.color = "red";
-          c++;
-        }
-        td4.innerText = details.result[0].rating;
-        userObj.currentRating = details.result[0].rating;
-        const td5 = document.createElement("td");
-        td5.innerText = score;
+        const userInfo = data.result[0];
+        userObj.maxRating = userInfo.maxRating || 0;
+        userObj.currentRating = userInfo.rating || 0;
         userObj.score = score;
-        const td6 = document.createElement("td");
-        td6.innerText = c;
-        userObj.redFlags = c;
-        userData.push(userObj);
-        tr.appendChild(td3);
-        tr.appendChild(td4);
-        tr.appendChild(td5);
-        tr.appendChild(td6);
-        table.appendChild(tr);
+        if(userObj.maxRating>userMaxRating) userMaxRating = userObj.maxRating
+        if (userInfo.maxRating < 800) c++;
+        if (userInfo.rating < 800) c++;
 
-        xValues = userData.map((elem) => {
-          return elem.name;
-        });
-        yValues = userData.map((elem) => {
-          return elem.currentRating;
-        });
-        new Chart("myChart", {
+        userObj.redFlags = c;
+
+        // Add to userData if not already present
+        if (!users.includes(userHandle)) {
+          users.push(userHandle);
+          userData.push(userObj);
+
+          // Add table row
+          const tbody = table.querySelector("tbody");
+          const tr = document.createElement("tr");
+
+          tr.innerHTML = `
+                                <td>${userHandle}</td>
+                                <td class="${
+                                  userObj.solved < 62 ? "red-flag" : ""
+                                }">${userObj.solved}</td>
+                                <td class="${
+                                  userObj.maxRating < 800 ? "red-flag" : ""
+                                }">${userObj.maxRating}</td>
+                                <td class="${
+                                  userObj.currentRating < 800 ? "red-flag" : ""
+                                }">${userObj.currentRating}</td>
+                                <td>${userObj.score}</td>
+                                <td class="${
+                                  userObj.redFlags > 0 ? "red-flag" : ""
+                                }">${userObj.redFlags}</td>
+                            `;
+
+          tbody.appendChild(tr);
+        }
+
+        // Update line chart with all users
+        const xValues = userData.map((elem) => elem.name);
+        const yValues = userData.map((elem) => elem.currentRating);
+
+        // Destroy existing chart if it exists
+        if (ratingChart) {
+          ratingChart.destroy();
+        }
+
+        const ctx = document.getElementById("myChart").getContext("2d");
+        ratingChart = new Chart(ctx, {
           type: "line",
           data: {
             labels: xValues,
             datasets: [
               {
-                fill: false,
-                lineTension: 0,
-                backgroundColor: "rgba(0,0,255,1.0)",
-                borderColor: "rgba(0,0,255,0.1)",
+                label: "Rating",
                 data: yValues,
+                fill: false,
+                tension: 0.1,
+                borderColor: "#ffffff",
+                backgroundColor: "#ffffff",
+                pointBackgroundColor: "#ffffff",
+                pointBorderColor: "#0a0a0a",
+                pointBorderWidth: 2,
+                pointRadius: 4,
               },
             ],
           },
           options: {
-            legend: { display: false },
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
             scales: {
-              yAxes: [{ rating: { min: 300, max: 10000 } }],
+              x: {
+                ticks: {
+                  color: "white",
+                },
+                grid: {
+                  color: "#333",
+                },
+              },
+              y: {
+                beginAtZero: false,
+                min: 300,
+                max: userMaxRating+200,
+                ticks: {
+                  color: "white",
+                },
+                grid: {
+                  color: "#333",
+                },
+              },
             },
           },
         });
 
-        // }
+        loading.classList.remove("active");
+        document.getElementById("forcesUsername").value = ""; // Clear input after successful fetch
       })
       .catch((e) => {
         console.log(e);
+        error.innerHTML = "Error fetching user ratings";
+        loading.classList.remove("active");
       });
-    console.log(userTagsObjs);
   }, 4000);
 };
+
+// Allow Enter key to trigger search
+document
+  .getElementById("forcesUsername")
+  .addEventListener("keypress", function (event) {
+    if (event.key === "Enter") {
+      fetchUser();
+    }
+  });
