@@ -1,47 +1,580 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Codeforces Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MY CP TRACKER</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
-</head>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: #0a0a0a;
+        color: #ffffff;
+        min-height: 100vh;
+        line-height: 1.6;
+      }
 
-<body>
-    <!-- <label for="name">Enter your codeforces username: 
-        <input id="forcesUsername" type="text"/>
-    </label>
-    <button onclick="fetchUser()"> GET DATA </button> -->
-    <label for="name" class="username-label">Enter your Codeforces username:</label>
-    <input id="forcesUsername" type="text" class="username-input" />
-    <button onclick="fetchUser()" class="get-data-btn">GET DATA</button>
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
 
+      .header {
+        text-align: center;
+        margin-bottom: 60px;
+      }
 
-    <table id="table" border="1">
-        <tr>
-            <td class="th">Username</td>
-            <td class="th">Codeforces solved count</td>
-            <td class="th">Codeforces Max Rating</td>
-            <td class="th">Codeforces Rating</td>
-            <td class="th">Total Score</td>
-            <td class="th">Red Flag(s)</td>
-        </tr>
-    </table>
-    <p id="error"></p>
+      .header h1 {
+        font-size: 2.5rem;
+        font-weight: 300;
+        margin-bottom: 20px;
+        color: #ffffff;
+      }
 
-    <!-- <div class="graph">
-        <h1>Graphical Race: </h1>
-        <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
-    </div> -->
-    <div class="graph">
-        <h1>Graphical Race:</h1>
-        <canvas id="myChart"></canvas>
+      .search-section {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+      }
+
+      .username-input {
+        padding: 12px 20px;
+        border: 1px solid #333;
+        border-radius: 4px;
+        font-size: 1rem;
+        width: 300px;
+        background: #1a1a1a;
+        color: #ffffff;
+        outline: none;
+        transition: border-color 0.3s ease;
+      }
+
+      .username-input:focus {
+        border-color: #ffffff;
+      }
+
+      .get-data-btn {
+        padding: 12px 24px;
+        border: 1px solid #ffffff;
+        border-radius: 4px;
+        font-size: 1rem;
+        background: transparent;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .get-data-btn:hover {
+        background: #ffffff;
+        color: #0a0a0a;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 40px;
+        margin-top: 60px;
+      }
+
+      .card {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 30px;
+        transition: border-color 0.3s ease;
+      }
+
+      .card:hover {
+        border-color: #555;
+      }
+
+      .card-title {
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin-bottom: 25px;
+        color: #ffffff;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      #table {
+        width: 100%;
+        border-collapse: collapse;
+        background: transparent;
+      }
+
+      #table th,
+      #table td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid #333;
+      }
+
+      #table th {
+        font-weight: 500;
+        color: #ffffff;
+        background: #0a0a0a;
+      }
+
+      #table td {
+        color: #ffffff;
+      }
+
+      #table tr:hover {
+        background: #222;
+      }
+
+      .chart-container {
+        position: relative;
+        height: 400px;
+      }
+
+      .pie-chart-container {
+        position: relative;
+        height: 400px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #error {
+        background: #1a1a1a;
+        color: #ffffff;
+        padding: 15px;
+        border-radius: 4px;
+        text-align: center;
+        margin: 20px 0;
+        border: 1px solid #333;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 30px;
+      }
+
+      .loading.active {
+        display: block;
+      }
+
+      .spinner {
+        border: 2px solid #333;
+        border-top: 2px solid #ffffff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .red-flag {
+        color: #ff4444;
+      }
+
+      .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 40px;
+      }
+
+      @media (max-width: 768px) {
+        .search-section {
+          flex-direction: column;
+        }
+
+        .username-input {
+          width: 100%;
+          max-width: 300px;
+        }
+
+        .charts-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Codeforces Analytics</h1>
+
+        <div class="search-section">
+          <input
+            id="forcesUsername"
+            type="text"
+            class="username-input"
+            placeholder="Enter username"
+          />
+          <button onclick="fetchUser()" class="get-data-btn">Analyze</button>
+        </div>
+      </div>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Loading data...</p>
+      </div>
+
+      <p id="error"></p>
+
+      <div class="dashboard-grid">
+        <div class="card">
+          <h3 class="card-title">User Performance</h3>
+          <div class="table-container">
+            <table id="table">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Solved</th>
+                  <th>Max Rating</th>
+                  <th>Current Rating</th>
+                  <th>Score</th>
+                  <th>Flags</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Rating Progress</h3>
+          <div class="chart-container">
+            <canvas id="myChart"></canvas>
+          </div>
+        </div>
+
+        <div id="pieChartsContainer" class="charts-grid">
+          <!-- Individual pie charts will be added here -->
+        </div>
+      </div>
     </div>
-    
-    <script src="main.js"></script>
 
-</body>
+    <script>
+      let maxRatingUser = 0;
+      let users = [];
+      let userData = [];
+      let userTagData = new Map(); // Store tag data for each user
+      let ratingChart = null; // Store reference to the rating chart
+      const table = document.getElementById("table");
+      const error = document.getElementById("error");
+      const loading = document.getElementById("loading");
+      const pieChartsContainer = document.getElementById("pieChartsContainer");
 
+      window.addEventListener("resize", function () {
+        var canvas = document.getElementById("myChart");
+        if (canvas) {
+          canvas.style.width = "100%";
+          canvas.style.height = "auto";
+        }
+      });
+
+      const createPieChart = (userHandle, tagzCount) => {
+        const labels = Object.keys(tagzCount);
+        const datas = Object.values(tagzCount);
+
+        if (labels.length > 0) {
+          // Create a new card for this user's pie chart
+          const pieChartCard = document.createElement("div");
+          pieChartCard.className = "card";
+          pieChartCard.innerHTML = `
+                    <h3 class="card-title">${userHandle} - Problem Tags</h3>
+                    <div class="pie-chart-container">
+                        <canvas id="tagPieChart_${userHandle}"></canvas>
+                    </div>
+                `;
+
+          pieChartsContainer.appendChild(pieChartCard);
+
+          // Create the pie chart
+          const ctx = document
+            .getElementById(`tagPieChart_${userHandle}`)
+            .getContext("2d");
+          new Chart(ctx, {
+            type: "pie",
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: "Problems",
+                  data: datas,
+                  backgroundColor: [
+                    "#FF6384",
+                    "#36A2EB",
+                    "#FFCE56",
+                    "#4BC0C0",
+                    "#9966FF",
+                    "#FF9F40",
+                    "#FF6384",
+                    "#C9CBCF",
+                    "#4BC0C0",
+                    "#FF6384",
+                    "#36A2EB",
+                    "#FFCE56",
+                    "#4BC0C0",
+                    "#9966FF",
+                    "#FF9F40",
+                    "#FF6384",
+                    "#C9CBCF",
+                    "#4BC0C0",
+                    "#FF6384",
+                    "#36A2EB",
+                  ].slice(0, labels.length),
+                  borderColor: "#0a0a0a",
+                  borderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: "bottom",
+                  labels: {
+                    color: "white",
+                    font: {
+                      size: 10,
+                    },
+                  },
+                },
+              },
+            },
+          });
+        }
+      };
+
+      const fetchUser = () => {
+        let userHandle = document.getElementById("forcesUsername").value.trim();
+
+        if (!userHandle) {
+          error.innerHTML = "Please enter a username";
+          return;
+        }
+
+        if (users.includes(userHandle)) {
+          error.innerHTML = `User "${userHandle}" already added`;
+          return;
+        }
+
+        loading.classList.add("active");
+        error.innerHTML = "";
+
+        const ur = `https://codeforces.com/api/user.status?handle=${userHandle}`;
+        const ur2 = `https://codeforces.com/api/user.info?handles=${userHandle}`;
+
+        let userObj = {};
+        let c = 0;
+        let score = 0;
+
+        // Fetch user submissions
+        setTimeout(() => {
+          fetch(ur)
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+
+              if (data.status === "FAILED") {
+                error.innerHTML = `User "${userHandle}" not found`;
+                loading.classList.remove("active");
+                return;
+              }
+
+              const res = data.result;
+              let tagz = [];
+
+              res.forEach((element) => {
+                if (element.verdict === "OK") {
+                  tagz.push(element.problem.tags);
+                }
+              });
+
+              let tagzCount = {};
+              tagz.forEach((tag) => {
+                tag.forEach((t) => {
+                  tagzCount[t] = (tagzCount[t] || 0) + 1;
+                });
+              });
+
+              // Store tag data for this user
+              userTagData.set(userHandle, tagzCount);
+
+              // Create individual pie chart for this user
+              createPieChart(userHandle, tagzCount);
+
+              const problems = data.result.filter(
+                (sub) => sub.verdict === "OK"
+              );
+              userObj.name = userHandle;
+              userObj.solved = problems.length;
+              score = 10 * problems.length;
+
+              if (problems.length < 62) {
+                c++;
+              }
+
+              return problems;
+            })
+            .catch((e) => {
+              console.log(e);
+              error.innerHTML = "Error fetching user data";
+              loading.classList.remove("active");
+            });
+        }, 1000);
+
+        // Fetch user info
+        setTimeout(() => {
+          fetch(ur2)
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+
+              if (data.status === "FAILED") {
+                return;
+              }
+
+              const userInfo = data.result[0];
+
+              userObj.maxRating = userInfo.maxRating || 0;
+              userObj.currentRating = userInfo.rating || 0;
+              userObj.score = score;
+              if (maxRatingUser <= userObj.maxRating)
+                maxRatingUser = userObj.maxRating;
+              if (userInfo.maxRating < 800) c++;
+              if (userInfo.rating < 800) c++;
+
+              userObj.redFlags = c;
+
+              // Add to userData if not already present
+              if (!users.includes(userHandle)) {
+                users.push(userHandle);
+                userData.push(userObj);
+
+                // Add table row
+                const tbody = table.querySelector("tbody");
+                const tr = document.createElement("tr");
+
+                tr.innerHTML = `
+                                <td>${userHandle}</td>
+                                <td class="${
+                                  userObj.solved < 62 ? "red-flag" : ""
+                                }">${userObj.solved}</td>
+                                <td class="${
+                                  userObj.maxRating < 800 ? "red-flag" : ""
+                                }">${userObj.maxRating}</td>
+                                <td class="${
+                                  userObj.currentRating < 800 ? "red-flag" : ""
+                                }">${userObj.currentRating}</td>
+                                <td>${userObj.score}</td>
+                                <td class="${
+                                  userObj.redFlags > 0 ? "red-flag" : ""
+                                }">${userObj.redFlags}</td>
+                            `;
+
+                tbody.appendChild(tr);
+              }
+
+              // Update line chart with all users
+              const xValues = userData.map((elem) => elem.name);
+              const yValues = userData.map((elem) => elem.currentRating);
+
+              // Destroy existing chart if it exists
+              if (ratingChart) {
+                ratingChart.destroy();
+              }
+
+              const ctx = document.getElementById("myChart").getContext("2d");
+              ratingChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                  labels: xValues,
+                  datasets: [
+                    {
+                      label: "Rating",
+                      data: yValues,
+                      fill: false,
+                      tension: 0.1,
+                      borderColor: "#ffffff",
+                      backgroundColor: "#ffffff",
+                      pointBackgroundColor: "#ffffff",
+                      pointBorderColor: "#0a0a0a",
+                      pointBorderWidth: 2,
+                      pointRadius: 4,
+                    },
+                  ],
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      display: false,
+                    },
+                  },
+                  scales: {
+                    x: {
+                      ticks: {
+                        color: "white",
+                      },
+                      grid: {
+                        color: "#333",
+                      },
+                    },
+                    y: {
+                      beginAtZero: false,
+                      min: 300,
+                      max: maxRatingUser + 200,
+                      ticks: {
+                        color: "white",
+                      },
+                      grid: {
+                        color: "#333",
+                      },
+                    },
+                  },
+                },
+              });
+              console.log(maxRatingUser);
+
+              loading.classList.remove("active");
+              document.getElementById("forcesUsername").value = ""; // Clear input after successful fetch
+            })
+            .catch((e) => {
+              console.log(e);
+              error.innerHTML = "Error fetching user ratings";
+              loading.classList.remove("active");
+            });
+        }, 4000);
+      };
+
+      // Allow Enter key to trigger search
+      document
+        .getElementById("forcesUsername")
+        .addEventListener("keypress", function (event) {
+          if (event.key === "Enter") {
+            fetchUser();
+          }
+        });
+    </script>
+  </body>
 </html>

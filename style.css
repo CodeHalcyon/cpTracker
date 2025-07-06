@@ -1,130 +1,116 @@
-*{
-    margin: 0;
-    padding: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+/* General reset and font */
+* {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+/* Table styling */
 table {
-    width: 90%;
-    margin: 10px auto;
-    border-collapse: collapse;
+  width: 90%;
+  margin: 10px auto;
+  border-collapse: collapse;
 }
 td, th {
-    padding: 20px;
-    font-size: 1rem;
-    font-family: Arial, sans-serif;
-    border: 1px solid #ccc;
+  padding: 20px;
+  font-size: 1rem;
+  font-family: Arial, sans-serif;
+  border: 1px solid #ccc;
 }
 .th {
-    font-weight: bold;
-    background-color: #f2f2f2;
+  font-weight: bold;
+  background-color: #f2f2f2;
 }
 
+/* Graph wrapper */
 .graph {
-    max-width: 50%;
-    margin: auto;
-    overflow-x: auto; /* Add horizontal scroll if needed on smaller screens */
+  max-width: 50%;
+  margin: auto;
+  overflow-x: auto;
 }
-.graph>h1{
-    display: block;
-    font-size: 1.25rem;
-    width: 50%;
-    margin: 0 auto;
-}
-
-canvas {
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    height: auto;
+.graph > h1 {
+  display: block;
+  font-size: 1.25rem;
+  width: 50%;
+  margin: 0 auto;
 }
 
-/* input styling */
+/* Input & Button Styling */
 .username-label {
-    display: block;
-    margin-bottom: 10px;
-    width: 50%;
-    margin: 0 auto;
-    font-weight: bolder;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  }
-  
-  .username-input {
-    display: block;
-    width: 50%;
-    padding: 10px;
-    margin: 10px auto;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
+  display: block;
+  margin-bottom: 10px;
+  width: 50%;
+  margin: 0 auto;
+  font-weight: bolder;
+}
+.username-input {
+  display: block;
+  width: 50%;
+  padding: 10px;
+  margin: 10px auto;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.get-data-btn {
+  display: block;
+  width: 50%;
+  margin: auto;
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.get-data-btn:hover {
+  background-color: #0056b3;
+}
+#error {
+  color: red;
+  font-size: 1.4rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 10px;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
   .get-data-btn {
-    display: block;
-    width: 50%;
-    margin: auto;
-    padding: 10px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    width: 30%;
   }
-  
-  .get-data-btn:hover {
-    background-color: #0056b3;
+}
+
+@media (max-width: 576px) {
+  .th, td {
+    font-size: 0.5rem;
+  }
+  .username-label {
+    font-size: 0.7rem;
+  }
+  .username-input {
+    width: 50%;
+    margin-inline: 25%;
+    font-size: 0.7rem;
+    padding: 10px;
+  }
+  .get-data-btn {
+    width: 30%;
+    font-size: 0.5rem;
+    padding: 10px;
+  }
+  .graph > h1 {
+    font-size: 0.5rem;
+  }
+  .graph {
+    width: 100%;
   }
   #error {
-    color: red;
-    font-size: 1.4rem;
-    font-weight: bold;
-    text-align: center;
-    margin: 10px;
-}
-  
-  @media (min-width: 768px) {
-    .username-label {
-        display: block;
-        font-weight: bolder;
-        margin-bottom: 10px;
-      }
-    
-    .get-data-btn {
-      width: 30%;
-    }
-    /* .graph{
-        width: 100%;
-    } */
+    font-size: 0.5rem;
   }
-
-  
-@media (max-width: 576px) {
-    .th,td {
-        font-size: 0.5rem;
-    }
-    .username-label{
-        font-size: 0.7rem;
-    }
-    .username-input {
-        width: 50%;
-        margin-inline: 25%;
-        font-size: 0.7rem;
-        padding: 10px;
-      }
-    .get-data-btn {
-        width: 30%;
-        margin: 0 auto;
-        font-size: 0.5rem;
-        padding: 10px;
-      }
-      .graph>h1{
-        font-size: 0.5rem;
-    }
-    .graph{
-        width: 100%;
-    }
-    #error{
-        font-size: 0.5rem;
-    }
 }
-  
+
+.smmm>canvas{
+  /* width: fit-content; */
+  width: 500px;
+}
